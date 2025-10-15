@@ -1,46 +1,75 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProductDto } from 'src/dto/create-product.dto';
+import { UpdateProductDto } from 'src/dto/update-product.dto';
+import { Product } from 'src/entities/product.entity';
 import { IProducts } from 'src/interfaces';
-import { Not } from 'typeorm';
+import { Repository } from 'typeorm/repository/Repository.js';
 
+/**
+ * Servicio de productos.
+ * Qué hace: gestiona la lógica CRUD con la base de datos.
+ * Dependencias: repositorio Product.
+ */
 @Injectable()
 export class ProductsService {
-    private products: IProducts[] = [
-        {id : 1, name: 'Televisor', description: 'Televisor de 25 pulgadas marca LG', price: 1000000},
-        {id : 2, name: 'Celular', description: 'Celular marca Samsung', price: 800000},
-        {id : 3, name: 'Tablet', description: 'Tablet marca Apple', price: 1200000},
-        {id : 4, name: 'Audifonos', description: 'Audifonos marca Sony', price: 200000},
-        {id : 5, name: 'Smartwatch', description: 'Smartwatch marca Huawei', price: 300000},
-    ]
+   constructor(
+    @InjectRepository(Product)
+     private productsRepo: Repository<Product>
+    ) {}
 
-    findAll(): IProducts[] {
-        return this.products;
-    }
-    findOne(id: number): IProducts {
-        const productFind = this.products.find(product => product.id === id);
-        if(!productFind) {
-            throw new NotFoundException(`Producto con id ${id} no encontrado`);
-        }
-        return productFind;
+    /**
+     * Obtiene todos los productos.
+     * Recibe: —.
+     * Devuelve: arreglo con todos los registros Product.
+     */
+    findAll() {
+        return this.productsRepo.find();
     }
 
-    create(product: Omit<IProducts, 'id'>): IProducts {
-        const newId = this.products.length > 0
-        ? this.products[this.products.length - 1].id + 1
-        : 1;
-        const newProduct: IProducts = { id: newId, ...product };
-        this.products.push(newProduct);
-        return newProduct;
-    }
+    /**
+     * Obtiene un producto por ID.
+     * Recibe: id (number).
+     * Devuelve: Product correspondiente.
+     * Errores: NotFoundException si no existe.
+     */
+     async findOne(id: number) {
+         const productFind = await this.productsRepo.findOne({ where: { id } });
+         if(!productFind) throw new NotFoundException(`Producto con id ${id} no encontrado`);
+         return productFind;
+     }
 
-    update(id: number, newProduct: Omit<IProducts, 'id'>): IProducts {
-         const product = this.findOne(id);
-         Object.assign(product, newProduct);
-            return product;
-    }
+     /**
+      * Crea un nuevo producto.
+      * Recibe: datos del producto (CreateProductDto).
+      * Devuelve: producto guardado en la base.
+      */
+     create(newProduct: CreateProductDto) {
+            const productCreated = this.productsRepo.create(newProduct);
+            return this.productsRepo.save(productCreated);
+     }
 
-    remove(id: number): void {
-        const product = this.products.findIndex((product) => product.id === id);
-        this.products.splice(product, 1);
-    }
+     /**
+      * Actualiza un producto existente.
+      * Recibe: id (number) y datos modificados (UpdateProductDto).
+      * Devuelve: producto actualizado.
+      */
+     async update(id: number, updateProduct: UpdateProductDto) {
+            await this.productsRepo.update(id, updateProduct);
+            return this.findOne(id);
+         }
+
+    /**
+     * Elimina un producto por ID.
+     * Recibe: id (number).
+     * Devuelve: mensaje de confirmación.
+     * Errores: BadRequestException si no existe el registro.
+     */
+    async remove(id: number) {
+             const result = await this.productsRepo.delete(id);
+             if (result.affected === 0) {
+                 throw new BadRequestException(`Producto con id ${id} no encontrado`);
+             }
+             return { message: `Producto con id ${id} eliminado correctamente` };
+         }
 }
-
