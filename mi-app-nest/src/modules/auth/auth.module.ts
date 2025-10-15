@@ -5,6 +5,9 @@ import { UsersService } from '../users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
 import { User } from 'src/entities/user.entity';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config/dist/config.module';
 
 /**
  * Módulo de autenticación.
@@ -16,7 +19,15 @@ import { User } from 'src/entities/user.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Product])],
+  imports: [
+    ConfigModule.forRoot({isGlobal: true}),
+    TypeOrmModule.forFeature([User, Product]),
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
+    }),
+  ],
   providers: [AuthService, UsersService],
   controllers: [AuthController]
 })
