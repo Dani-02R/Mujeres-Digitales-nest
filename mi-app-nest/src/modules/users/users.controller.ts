@@ -2,13 +2,15 @@ import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { UsersService } from './users.service';
 import { CreateUserDTO } from 'src/dto/create-user.dto';
 import { UpdateUserDTO } from 'src/dto/update-user.dto';
-
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 /**
  * Controlador de usuarios.
  * Ruta base: /users
  * Expone endpoints CRUD para gestión de usuarios.
  */
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 

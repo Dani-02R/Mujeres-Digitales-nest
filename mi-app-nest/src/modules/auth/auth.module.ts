@@ -8,6 +8,8 @@ import { User } from 'src/entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
+import { ConfigService } from '@nestjs/config';
+import { JwtStrategy } from './jwt.strategy';
 
 /**
  * Módulo de autenticación.
@@ -22,13 +24,17 @@ import { ConfigModule } from '@nestjs/config/dist/config.module';
   imports: [
     ConfigModule.forRoot({isGlobal: true}),
     TypeOrmModule.forFeature([User, Product]),
-    PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET_KEY'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '1h'},
+      }),
     }),
   ],
-  providers: [AuthService, UsersService],
+  providers: [AuthService, UsersService, JwtStrategy],
   controllers: [AuthController]
 })
 export class AuthModule {}

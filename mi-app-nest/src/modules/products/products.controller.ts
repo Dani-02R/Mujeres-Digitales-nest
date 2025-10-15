@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProducts } from 'src/interfaces/IProducts';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 
 /**
  * Controlador de productos.
@@ -42,6 +43,7 @@ export class ProductsController {
       * Recibe: cuerpo con los datos del producto (CreateProductDto).
       * Devuelve: el producto recién creado.
       */
+     @UseGuards(JwtAuthGuard)
      @Post()
      create(@Body() Body: CreateProductDto) {
          return this.productsService.create(Body);
@@ -53,6 +55,7 @@ export class ProductsController {
       * Recibe: id (param) y cuerpo con campos actualizados (UpdateProductDto).
       * Devuelve: el producto actualizado.
       */
+     @UseGuards(JwtAuthGuard)
      @Put(':id')
      update(@Param('id') id: string, @Body() body: UpdateProductDto) {
          return this.productsService.update(Number(id), body);
@@ -65,6 +68,7 @@ export class ProductsController {
       * Devuelve: mensaje de confirmación.
       * Errores: 400 si el producto no existe.
       */
+     @UseGuards(JwtAuthGuard)
      @Delete(':id')
      remove(@Param('id') id: string) {
          return this.productsService.remove(Number(id));
