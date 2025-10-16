@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
 import { Product } from 'src/entities/product.entity';
-import { IProducts } from 'src/interfaces';
-import { Repository } from 'typeorm/repository/Repository.js';
+import { Repository } from 'typeorm';
+import { IProducts } from 'src/interfaces/IProducts';
+
 
 /**
  * Servicio de productos.
@@ -38,6 +39,16 @@ export class ProductsService {
          if(!productFind) throw new NotFoundException(`Producto con id ${id} no encontrado`);
          return productFind;
      }
+
+   async findByName(name: string): Promise<Product> {
+    const product = await this.productsRepo
+      .createQueryBuilder('product')
+      .where('UPPER(product.name) = (:name)', { name: name.trim() })
+      .getOne();
+
+    if (!product) throw new NotFoundException(`Producto con nombre ${name} no encontrado`);
+    return product;
+  }
 
      /**
       * Crea un nuevo producto.

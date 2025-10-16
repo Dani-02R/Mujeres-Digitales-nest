@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO } from 'src/dto/create-user.dto';
 import { UpdateUserDTO } from 'src/dto/update-user.dto';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { JwtAuthGuard } from '../auth/jwt.guard';
+
 /**
  * Controlador de usuarios.
  * Ruta base: /users
@@ -33,8 +34,8 @@ export class UsersController {
      * Errores: 404 si no existe.
      */
      @Get(':id')
-     findOne(@Param('id') id: string) {
-         return this.usersService.findOne(Number(id))
+     findOne(@Param('id', ParseIntPipe) id: number) {
+         return this.usersService.findOne(id)
      }
 
      /**
@@ -55,8 +56,8 @@ export class UsersController {
       * Devuelve: usuario actualizado.
       */
      @Put(':id')
-     update(@Param('id') id: string, @Body() body: UpdateUserDTO) {
-         return this.usersService.update(Number(id), body)
+     update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserDTO) {
+         return this.usersService.update(id, body)
      }
 
      /**
@@ -67,7 +68,7 @@ export class UsersController {
       * Errores: 400 si el usuario no existe.
       */
      @Delete(':id')
-     remove(@Param('id') id: string) {
-         return this.usersService.remove(Number(id))
+     remove(@Param('id', ParseIntPipe) id: number) {
+         return this.usersService.remove(id)
      }
 }

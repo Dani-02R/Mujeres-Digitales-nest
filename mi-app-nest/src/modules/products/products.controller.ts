@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProducts } from 'src/interfaces/IProducts';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
+import {  ParseUpperTrimPipe } from 'src/common/pipes/parse-uppertrim.pipe';
 
 /**
  * Controlador de productos.
@@ -33,8 +34,13 @@ export class ProductsController {
      * Errores: 404 si no se encuentra el producto.
      */
      @Get(':id')
-     findOne(@Param('id') id: string) {
-         return this.productsService.findOne(Number(id));
+     findOne(@Param('id', ParseIntPipe) id: number) {
+         return this.productsService.findOne(id);
+     }
+
+     @Get('by-name/:name')
+     findByName(@Param('name', ParseUpperTrimPipe) name: string) {
+         return this.productsService.findByName(name);
      }
 
      /**
@@ -57,8 +63,8 @@ export class ProductsController {
       */
      @UseGuards(JwtAuthGuard)
      @Put(':id')
-     update(@Param('id') id: string, @Body() body: UpdateProductDto) {
-         return this.productsService.update(Number(id), body);
+     update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateProductDto) {
+         return this.productsService.update(id, body);
      }
 
      /**
@@ -70,7 +76,7 @@ export class ProductsController {
       */
      @UseGuards(JwtAuthGuard)
      @Delete(':id')
-     remove(@Param('id') id: string) {
-         return this.productsService.remove(Number(id));
+     remove(@Param('id', ParseIntPipe) id: number) {
+         return this.productsService.remove(id);
      }
 }
