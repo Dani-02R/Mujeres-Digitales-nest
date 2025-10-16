@@ -24,4 +24,7 @@ export class Product {
    */
   @Column('decimal', { precision: 10, scale: 2, nullable: false })
   price: number;
+
+  @Column({ type: 'boolean', default: true })
+  status: boolean; // <-- NUEVO campo para estado del producto
 }

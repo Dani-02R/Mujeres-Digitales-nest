@@ -25,7 +25,7 @@ export class ProductsService {
      * Devuelve: arreglo con todos los registros Product.
      */
     findAll() {
-        return this.productsRepo.find();
+        return this.productsRepo.findBy({ status: true });
     }
 
     /**
@@ -40,15 +40,12 @@ export class ProductsService {
          return productFind;
      }
 
-   async findByName(name: string): Promise<Product> {
-    const product = await this.productsRepo
-      .createQueryBuilder('product')
-      .where('UPPER(product.name) = (:name)', { name: name.trim() })
-      .getOne();
-
-    if (!product) throw new NotFoundException(`Producto con nombre ${name} no encontrado`);
-    return product;
-  }
+   async findByName(name: string){
+    const productFind = await this.productsRepo.findOne({ where: { name } });
+    if(!productFind) throw new NotFoundException(`Producto con nombre ${name} no encontrado`);
+    return productFind;
+   }
+  
 
      /**
       * Crea un nuevo producto.
@@ -76,11 +73,16 @@ export class ProductsService {
      * Devuelve: mensaje de confirmación.
      * Errores: BadRequestException si no existe el registro.
      */
-    async remove(id: number) {
-             const result = await this.productsRepo.delete(id);
-             if (result.affected === 0) {
-                 throw new BadRequestException(`Producto con id ${id} no encontrado`);
-             }
-             return { message: `Producto con id ${id} eliminado correctamente` };
-         }
+   async disabled(id: number) {
+  const productFind = await this.findOne(id);
+  if (!productFind) {
+    throw new NotFoundException(`Producto con id ${id} no encontrado`);
+  }
+
+  productFind.status = false;
+  await this.productsRepo.save(productFind);
+
+  return { message: `Producto con id ${id} eliminado correctamente` };
+}
+
 }

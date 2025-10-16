@@ -76,7 +76,7 @@ export class ProductsController {
       */
      @UseGuards(JwtAuthGuard)
      @Delete(':id')
-     remove(@Param('id', ParseIntPipe) id: number) {
-         return this.productsService.remove(id);
+     disabled(@Param('id', ParseIntPipe) id: number) {
+         return this.productsService.disabled(id);
      }
 }
