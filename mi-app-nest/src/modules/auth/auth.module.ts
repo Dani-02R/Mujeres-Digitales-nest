@@ -12,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 
 /**
- * Módulo de autenticación.
+ * Módulo de autenticación.a
  * Qué hace: agrupa controller y service de auth.
  * Importa: repositorios TypeORM de User y Product.
  * Expone: AuthController; provee AuthService.

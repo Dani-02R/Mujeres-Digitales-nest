@@ -5,6 +5,7 @@ import { UpdateUserDTO } from 'src/dto/update-user.dto';
 import { User } from 'src/entities/user.entity';
 import { IUser } from 'src/interfaces';
 import { Repository } from 'typeorm/repository/Repository.js';
+import * as bcrypt from 'bcrypt';
 
 /**
  * Servicio de usuarios.
@@ -55,7 +56,8 @@ export class UsersService {
       * Devuelve: usuario actualizado.
       */
      async update(id: number, updateUser: UpdateUserDTO) {
-        await this.usersRepo.update(id, updateUser);
+        const hashedPassword = await bcrypt.hash(updateUser.password, 10);
+        await this.usersRepo.update(id, { ...updateUser, password: hashedPassword });
         return this.findOne(id);
      }
 
