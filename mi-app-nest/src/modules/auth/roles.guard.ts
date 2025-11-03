@@ -2,6 +2,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
+import { BussinessException } from 'src/common/exceptions/bussines.exception';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class RolesGuard implements CanActivate {
     if (!user) throw new ForbiddenException('Usuario no autenticado');
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('No tienes permisos para acceder a este recurso');
+      throw new BussinessException('No tienes permisos para acceder a este recurso');
     }
     return true;
   }
