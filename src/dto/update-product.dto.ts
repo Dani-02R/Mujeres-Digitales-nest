@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateProductDto } from './create-product.dto';
 
@@ -21,4 +21,8 @@ import { CreateProductDto } from './create-product.dto';
  */
 
 
-export class UpdateProductDto extends CreateProductDto {}
+export class UpdateProductDto extends CreateProductDto {
+    @IsNotEmpty()
+    @IsBoolean()
+    status: boolean;
+}

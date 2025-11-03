@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from 'src/dto/login.dto';
 import { CreateUserDTO } from 'src/dto/create-user.dto';
+import { Request } from '@nestjs/common';
+import { JwtAuthGuard } from './jwt.guard';
 
 /**
  * Controlador de autenticación.
@@ -23,6 +25,14 @@ export class AuthController {
      login(@Body() data: LoginDTO) {
          return this.authService.login(data);
      }
+
+    @UseGuards(JwtAuthGuard)
+     @Get('profile')
+     getProfile(@Request() req) {
+         return req.user.id;
+     }
+
+     
 }
 
 /**

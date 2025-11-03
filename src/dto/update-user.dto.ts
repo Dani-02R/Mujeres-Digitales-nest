@@ -1,4 +1,6 @@
+import { IsNotEmpty } from "class-validator";
 import { CreateUserDTO } from "./create-user.dto";
+import { Roles, RolesEnum } from "src/entities/user.entity";
 
 /**
  * DTO: UpdateUserDTO
@@ -20,4 +22,7 @@ import { CreateUserDTO } from "./create-user.dto";
  */
 
 
-export class UpdateUserDTO extends CreateUserDTO {}
+export class UpdateUserDTO extends CreateUserDTO {
+    @IsNotEmpty()
+    role: RolesEnum
+}

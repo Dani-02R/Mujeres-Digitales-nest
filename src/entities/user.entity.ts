@@ -1,4 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+export type Roles = 'admin' | 'user';
+
+export enum  RolesEnum {
+  ADMIN = 'admin',
+  USER = 'user',
+}
 
 /**
  * Entidad: User
@@ -25,4 +31,8 @@ export class User {
   /** Edad opcional del usuario; puede ser nula. */
   @Column({ nullable: true })
   age: number;
+
+  /** Rol del usuario para control de acceso (e.g., 'admin', 'user'). */
+  @Column({default: 'user'})
+  role: Roles;
 }

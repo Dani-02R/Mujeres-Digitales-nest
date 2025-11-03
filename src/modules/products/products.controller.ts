@@ -1,8 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProducts } from 'src/interfaces/IProducts';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
+import { JwtAuthGuard } from '../auth/jwt.guard';
+import {  ParseUpperTrimPipe } from 'src/common/pipes/parse-uppertrim.pipe';
+import { RolesGuard } from '../auth/roles.guard';
+import { RolesEnum } from 'src/entities/user.entity';
+import { Roles } from '../auth/roles.decorator';
 
 /**
  * Controlador de productos.
@@ -32,8 +37,15 @@ export class ProductsController {
      * Errores: 404 si no se encuentra el producto.
      */
      @Get(':id')
-     findOne(@Param('id') id: string) {
-         return this.productsService.findOne(Number(id));
+     @UseGuards(JwtAuthGuard, RolesGuard)
+     @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+     findOne(@Param('id', ParseIntPipe) id: number) {
+         return this.productsService.findOne(id);
+     }
+
+     @Get('by-name/:name')
+     findByName(@Param('name', ParseUpperTrimPipe) name: string) {
+         return this.productsService.findByName(name);
      }
 
      /**
@@ -42,7 +54,10 @@ export class ProductsController {
       * Recibe: cuerpo con los datos del producto (CreateProductDto).
       * Devuelve: el producto recién creado.
       */
+
      @Post()
+      @UseGuards(JwtAuthGuard, RolesGuard)
+     @Roles(RolesEnum.ADMIN)
      create(@Body() Body: CreateProductDto) {
          return this.productsService.create(Body);
      }
@@ -53,9 +68,12 @@ export class ProductsController {
       * Recibe: id (param) y cuerpo con campos actualizados (UpdateProductDto).
       * Devuelve: el producto actualizado.
       */
+ 
      @Put(':id')
-     update(@Param('id') id: string, @Body() body: UpdateProductDto) {
-         return this.productsService.update(Number(id), body);
+      @UseGuards(JwtAuthGuard, RolesGuard)
+     @Roles(RolesEnum.ADMIN)
+     update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateProductDto) {
+         return this.productsService.update(id, body);
      }
 
      /**
@@ -65,8 +83,11 @@ export class ProductsController {
       * Devuelve: mensaje de confirmación.
       * Errores: 400 si el producto no existe.
       */
+
      @Delete(':id')
-     remove(@Param('id') id: string) {
-         return this.productsService.remove(Number(id));
+      @UseGuards(JwtAuthGuard, RolesGuard)
+     @Roles(RolesEnum.ADMIN)
+     disabled(@Param('id', ParseIntPipe) id: number) {
+         return this.productsService.disabled(id);
      }
 }

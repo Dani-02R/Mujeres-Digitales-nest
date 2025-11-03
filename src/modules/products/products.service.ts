@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from 'src/dto/create-product.dto';
 import { UpdateProductDto } from 'src/dto/update-product.dto';
 import { Product } from 'src/entities/product.entity';
-import { IProducts } from 'src/interfaces';
-import { Repository } from 'typeorm/repository/Repository.js';
+import { Repository } from 'typeorm';
+import { IProducts } from 'src/interfaces/IProducts';
+
 
 /**
  * Servicio de productos.
@@ -24,7 +25,7 @@ export class ProductsService {
      * Devuelve: arreglo con todos los registros Product.
      */
     findAll() {
-        return this.productsRepo.find();
+        return this.productsRepo.findBy({ status: true });
     }
 
     /**
@@ -38,6 +39,13 @@ export class ProductsService {
          if(!productFind) throw new NotFoundException(`Producto con id ${id} no encontrado`);
          return productFind;
      }
+
+   async findByName(name: string){
+    const productFind = await this.productsRepo.findOne({ where: { name } });
+    if(!productFind) throw new NotFoundException(`Producto con nombre ${name} no encontrado`);
+    return productFind;
+   }
+  
 
      /**
       * Crea un nuevo producto.
@@ -65,11 +73,16 @@ export class ProductsService {
      * Devuelve: mensaje de confirmación.
      * Errores: BadRequestException si no existe el registro.
      */
-    async remove(id: number) {
-             const result = await this.productsRepo.delete(id);
-             if (result.affected === 0) {
-                 throw new BadRequestException(`Producto con id ${id} no encontrado`);
-             }
-             return { message: `Producto con id ${id} eliminado correctamente` };
-         }
+   async disabled(id: number) {
+  const productFind = await this.findOne(id);
+  if (!productFind) {
+    throw new NotFoundException(`Producto con id ${id} no encontrado`);
+  }
+
+  productFind.status = false;
+  await this.productsRepo.save(productFind);
+
+  return { message: `Producto con id ${id} eliminado correctamente` };
+}
+
 }
